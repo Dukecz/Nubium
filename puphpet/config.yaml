@@ -49,7 +49,7 @@ vagrantfile:
             folder1:
                 owner: vagrant
                 group: vagrant
-                source: 'C:/Users/Duke/Downloads/vagrant/webroot'
+                source: './webroot'
                 target: /var/www
                 sync_type: smb
                 smb:
