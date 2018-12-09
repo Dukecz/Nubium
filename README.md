@@ -11,3 +11,7 @@
 ## Known simplifications and limitations
 
 * MySQL database has weak passwords and unnecesarily broad ```nubium``` user permissions
+* Usernames can be enumerated during registration
+* Frontend is heavily simplified
+* vendor folder is versioned because of vagrant
+* HTTPS is disabled because of lack of certificates (would be solved with LE)
