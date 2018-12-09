@@ -5,6 +5,8 @@
  * Copyright (c) 2009 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Tester\Runner;
 
 use Tester\CodeCoverage;
@@ -24,8 +26,7 @@ class CliTester
 	private $interpreter;
 
 
-	/** @return int|null */
-	public function run()
+	public function run(): ?int
 	{
 		Environment::setupColors();
 		Environment::setupErrors();
@@ -42,7 +43,7 @@ class CliTester
 
 		if ($cmd->isEmpty() || $this->options['--help']) {
 			$cmd->help();
-			return;
+			return null;
 		}
 
 		$this->createPhpInterpreter();
@@ -51,7 +52,7 @@ class CliTester
 			$job = new Job(new Test(__DIR__ . '/info.php'), $this->interpreter);
 			$job->run();
 			echo $job->getTest()->stdout;
-			return;
+			return null;
 		}
 
 		if ($this->options['--coverage']) {
@@ -59,8 +60,8 @@ class CliTester
 		}
 
 		$runner = $this->createRunner();
-		$runner->setEnvironmentVariable(Environment::RUNNER, 1);
-		$runner->setEnvironmentVariable(Environment::COLORS, (int) Environment::$useColors);
+		$runner->setEnvironmentVariable(Environment::RUNNER, '1');
+		$runner->setEnvironmentVariable(Environment::COLORS, (string) (int) Environment::$useColors);
 		if (isset($coverageFile)) {
 			$runner->setEnvironmentVariable(Environment::COVERAGE, $coverageFile);
 		}
@@ -72,7 +73,7 @@ class CliTester
 
 		if ($this->options['--watch']) {
 			$this->watch($runner);
-			return;
+			return null;
 		}
 
 		$result = $runner->run();
@@ -85,13 +86,12 @@ class CliTester
 	}
 
 
-	/** @return CommandLine */
-	private function loadOptions()
+	private function loadOptions(): CommandLine
 	{
 		echo <<<'XX'
  _____ ___  ___ _____ ___  ___
 |_   _/ __)( __/_   _/ __)| _ )
-  |_| \___ /___) |_| \___ |_|_\  v2.0.2
+  |_| \___ /___) |_| \___ |_|_\  v2.1.0
 
 
 XX;
@@ -127,7 +127,7 @@ XX
 			'--temp' => [CommandLine::REALPATH => true],
 			'paths' => [CommandLine::REPEATABLE => true, CommandLine::VALUE => getcwd()],
 			'--debug' => [],
-			'--coverage-src' => [CommandLine::REALPATH => true],
+			'--coverage-src' => [CommandLine::REALPATH => true, CommandLine::REPEATABLE => true],
 		]);
 
 		if (isset($_SERVER['argv'])) {
@@ -138,10 +138,6 @@ XX
 			if ($tmp = array_search('--tap', $_SERVER['argv'], true)) {
 				unset($_SERVER['argv'][$tmp]);
 				$_SERVER['argv'] = array_merge($_SERVER['argv'], ['-o', 'tap']);
-			}
-
-			if (array_search('-p', $_SERVER['argv'], true) === false) {
-				echo "Note: Default interpreter is CLI since Tester v2.0. It used to be CGI.\n";
 			}
 		}
 
@@ -160,8 +156,7 @@ XX
 	}
 
 
-	/** @return void */
-	private function createPhpInterpreter()
+	private function createPhpInterpreter(): void
 	{
 		$args = $this->options['-C'] ? [] : ['-n'];
 		if ($this->options['-c']) {
@@ -186,8 +181,7 @@ XX
 	}
 
 
-	/** @return Runner */
-	private function createRunner()
+	private function createRunner(): Runner
 	{
 		$runner = new Runner($this->interpreter);
 		$runner->paths = $this->options['paths'];
@@ -217,20 +211,18 @@ XX
 		}
 
 		if ($this->options['--setup']) {
-			call_user_func(function () use ($runner) {
+			(function () use ($runner): void {
 				require func_get_arg(0);
-			}, $this->options['--setup']);
+			})($this->options['--setup']);
 		}
 		return $runner;
 	}
 
 
-	/** @return string */
-	private function prepareCodeCoverage()
+	private function prepareCodeCoverage(): string
 	{
 		if (!$this->interpreter->canMeasureCodeCoverage()) {
-			$alternative = PHP_VERSION_ID >= 70000 ? ' or phpdbg SAPI' : '';
-			throw new \Exception("Code coverage functionality requires Xdebug extension$alternative (used {$this->interpreter->getCommandLine()})");
+			throw new \Exception("Code coverage functionality requires Xdebug extension or phpdbg SAPI (used {$this->interpreter->getCommandLine()})");
 		}
 		file_put_contents($this->options['--coverage'], '');
 		$file = realpath($this->options['--coverage']);
@@ -239,11 +231,14 @@ XX
 	}
 
 
-	/** @return void */
-	private function finishCodeCoverage($file)
+	private function finishCodeCoverage(string $file): void
 	{
 		if (!in_array($this->options['-o'], ['none', 'tap', 'junit'], true)) {
 			echo 'Generating code coverage report... ';
+		}
+		if (filesize($file) === 0) {
+			echo 'failed. Coverage file is empty. Do you call Tester\Environment::setup() in tests?';
+			return;
 		}
 		if (pathinfo($file, PATHINFO_EXTENSION) === 'xml') {
 			$generator = new CodeCoverage\Generators\CloverXMLGenerator($file, $this->options['--coverage-src']);
@@ -255,8 +250,7 @@ XX
 	}
 
 
-	/** @return void */
-	private function watch(Runner $runner)
+	private function watch(Runner $runner): void
 	{
 		$prev = [];
 		$counter = 0;

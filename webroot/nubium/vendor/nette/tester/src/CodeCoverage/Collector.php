@@ -5,6 +5,8 @@
  * Copyright (c) 2009 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Tester\CodeCoverage;
 
 
@@ -20,10 +22,7 @@ class Collector
 	private static $collector;
 
 
-	/**
-	 * @return bool
-	 */
-	public static function isStarted()
+	public static function isStarted(): bool
 	{
 		return self::$file !== null;
 	}
@@ -31,18 +30,16 @@ class Collector
 
 	/**
 	 * Starts gathering the information for code coverage.
-	 * @param  string
-	 * @return void
 	 * @throws \LogicException
 	 */
-	public static function start($file)
+	public static function start(string $file): void
 	{
 		if (self::isStarted()) {
 			throw new \LogicException('Code coverage collector has been already started.');
 		}
 		self::$file = fopen($file, 'c+');
 
-		if (defined('PHPDBG_VERSION') && PHP_VERSION_ID >= 70000) {
+		if (defined('PHPDBG_VERSION')) {
 			phpdbg_start_oplog();
 			self::$collector = 'collectPhpDbg';
 
@@ -51,11 +48,10 @@ class Collector
 			self::$collector = 'collectXdebug';
 
 		} else {
-			$alternative = PHP_VERSION_ID >= 70000 ? ' or phpdbg SAPI' : '';
-			throw new \LogicException("Code coverage functionality requires Xdebug extension$alternative.");
+			throw new \LogicException('Code coverage functionality requires Xdebug extension or phpdbg SAPI.');
 		}
 
-		register_shutdown_function(function () {
+		register_shutdown_function(function (): void {
 			register_shutdown_function([__CLASS__, 'save']);
 		});
 	}
@@ -64,7 +60,7 @@ class Collector
 	/**
 	 * Flushes all gathered information. Effective only with PHPDBG collector.
 	 */
-	public static function flush()
+	public static function flush(): void
 	{
 		if (self::isStarted() && self::$collector === 'collectPhpDbg') {
 			self::save();
@@ -74,16 +70,15 @@ class Collector
 
 	/**
 	 * Saves information about code coverage. Can be called repeatedly to free memory.
-	 * @return void
 	 * @throws \LogicException
 	 */
-	public static function save()
+	public static function save(): void
 	{
 		if (!self::isStarted()) {
 			throw new \LogicException('Code coverage collector has not been started.');
 		}
 
-		list($positive, $negative) = call_user_func([__CLASS__, self::$collector]);
+		[$positive, $negative] = [__CLASS__, self::$collector]();
 
 		flock(self::$file, LOCK_EX);
 		fseek(self::$file, 0);
@@ -100,9 +95,8 @@ class Collector
 
 	/**
 	 * Collects information about code coverage.
-	 * @return array
 	 */
-	private static function collectXdebug()
+	private static function collectXdebug(): array
 	{
 		$positive = $negative = [];
 
@@ -126,9 +120,8 @@ class Collector
 
 	/**
 	 * Collects information about code coverage.
-	 * @return array
 	 */
-	private static function collectPhpDbg()
+	private static function collectPhpDbg(): array
 	{
 		$positive = phpdbg_end_oplog();
 		$negative = phpdbg_get_executable();
