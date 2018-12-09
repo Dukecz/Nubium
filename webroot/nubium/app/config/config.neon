@@ -13,3 +13,4 @@ session:
 
 services:
 	router: App\RouterFactory::createRouter
+	authenticator: App\authenticators\DatabaseAuthenticator
