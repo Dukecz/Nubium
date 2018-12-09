@@ -24,16 +24,6 @@ vagrantfile:
                         hostname: nubium.puphpet
                         network:
                             private_network: 192.168.56.101
-                            forwarded_port:
-                                port1:
-                                    host: '8080'
-                                    guest: '80'
-                                port_fbx:
-                                    host: '8443'
-                                    guest: '443'
-                                port_mr9:
-                                    host: '8022'
-                                    guest: '22'
                         memory: '512'
                         cpus: '1'
         provision:
