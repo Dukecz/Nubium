@@ -84,6 +84,43 @@ final class HomepagePresenter extends Presenter
 		return $form;
 	}
 
+	public function createComponentProfileForm()
+	{
+		$form = new Form();
+		$form->addPassword('password', 'Password')
+			->setRequired()
+			->addRule(Form::MIN_LENGTH, 'Password must have at least 8 characters.', 8)
+			->addRule(Form::PATTERN, 'Password must contain at least one letter.', '[a-zA-Z]+')
+		;
+
+		$form->addPassword('passwordConfirm', 'Confirm password')
+			->setRequired()
+			->addRule(Form::EQUAL, 'Passwords doesn\'t match.', $form['password'])
+		;
+
+		$form->addSubmit('update', 'Update');
+
+		$form->onSuccess[] = function (Form $form, stdClass $values) {
+			$result = $this->db->query('UPDATE users SET',
+				[
+					'password' => password_hash($values->password, \PASSWORD_BCRYPT),
+				],
+				'WHERE id = ?',
+				$this->getUser()->getId()
+			);
+			if ($result->getRowCount() === 1) {
+				$this->flashMessage('Update successful', 'success');
+			} else {
+				$this->flashMessage('Update failed', 'danger');
+			}
+			$this->redirect('Homepage:');
+		};
+
+		BaseFormFactory::bootstrapize($form);
+
+		return $form;
+	}
+
 	protected function registerUser(string $username, string $password, string $email): bool
 	{
 		try {
