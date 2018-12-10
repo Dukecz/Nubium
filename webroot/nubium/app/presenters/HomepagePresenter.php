@@ -222,6 +222,15 @@ final class HomepagePresenter extends Presenter
 					$this->db->query('UPDATE articles SET rank = rank - 1 WHERE id = ?', $id);
 					break;
 			}
+
+			$this->db->query('INSERT INTO votes',
+				[
+					'articleId' => $id,
+					'ip' => $_SERVER['REMOTE_ADDR'],
+					'voteType' => $vote
+				]
+			);
+
 			$this->sendJson($this->db->fetchField('SELECT rank FROM articles WHERE id = ?', $id));
 		}
 	}
