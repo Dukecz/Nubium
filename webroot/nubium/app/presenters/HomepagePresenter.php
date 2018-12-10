@@ -19,16 +19,40 @@ final class HomepagePresenter extends Presenter
 	/** @var Context @inject */
 	public $db;
 
-	public function renderDefault(int $page = 1): void
+	/**
+	 * @param int $page
+	 * @param string|null $sortBy
+	 * @param string $sortDirection
+	 * @throws \Nette\Application\AbortException
+	 */
+	public function renderDefault(int $page = 1, ?string $sortBy = 'dateCreated', string $sortDirection = 'asc'): void
 	{
+		if (!in_array($sortBy, ['dateCreated', 'title', 'rank'])) {
+			$this->redirect('Homepage:');
+		}
+
 		if ($this->getUser()->isLoggedIn()) {
 			$numberOfArticles = $this->db->fetchField('SELECT COUNT(*) FROM articles');
 			$paginator = $this->getPaginator($numberOfArticles, $page);
-			$articles = $this->db->fetchAll('SELECT * FROM articles LIMIT ? OFFSET ?', $paginator->getLength(), $paginator->getOffset());
+			$articles = $this->db->fetchAll(
+				'SELECT * FROM articles ORDER BY ? LIMIT ? OFFSET ? ',
+				[
+					$sortBy => $sortDirection === 'asc',
+				],
+				$paginator->getLength(),
+				$paginator->getOffset()
+			);
 		} else {
-			$numberOfArticles = $this->database->fetchField('SELECT COUNT(*) FROM articles WHERE registeredOnly = 0');
+			$numberOfArticles = $this->db->fetchField('SELECT COUNT(*) FROM articles WHERE registeredOnly = 0');
 			$paginator = $this->getPaginator($numberOfArticles, $page);
-			$articles = $this->db->fetchAll('SELECT * FROM articles WHERE registeredOnly = 0', $paginator->getLength(), $paginator->getOffset());
+			$articles = $this->db->fetchAll(
+				'SELECT * FROM articles WHERE registeredOnly = 0 ORDER BY ? LIMIT ? OFFSET ? ',
+				[
+					$sortBy => $sortDirection === 'asc',
+				],
+				$paginator->getLength(),
+				$paginator->getOffset()
+			);
 		}
 
 		$this->template->add('articles', empty($articles) ? [] : $articles);
@@ -39,7 +63,7 @@ final class HomepagePresenter extends Presenter
 	{
 		$paginator = new Paginator();
 		$paginator->setItemCount($totalCount);
-		$paginator->setItemsPerPage(1);
+		$paginator->setItemsPerPage(10);
 		$paginator->setPage($page);
 
 		return $paginator;

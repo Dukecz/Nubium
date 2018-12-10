@@ -13,6 +13,11 @@
 		}
 	</script>
 
+<span>Sort by: <br />
+	Date added: <a href="{link Homepage: sortBy => dateCreated, sortDirection => asc, page => $paginator->page}">↑</a> <a href="{link Homepage: sortBy => dateCreated, sortDirection => desc, page => $paginator->page}">↓</a> |
+	Title: <a href="{link Homepage: sortBy => title, sortDirection => asc, page => $paginator->page}">↑</a> <a href="{link Homepage: sortBy => title, sortDirection => desc, page => $paginator->page}">↓</a> |
+	Rank: <a href="{link Homepage: sortBy => rank, sortDirection => asc, page => $paginator->page}">↑</a> <a href="{link Homepage: sortBy => rank, sortDirection => desc, page => $paginator->page}">↓</a>
+</span>
 {foreach $articles as $article}
 	<div class="jumbotron">
 		<h1 class="display-6">{$article->title}</h1>
