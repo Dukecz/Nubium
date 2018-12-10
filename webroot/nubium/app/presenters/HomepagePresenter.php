@@ -8,6 +8,7 @@ use Nette\Application\UI\Presenter;
 use Nette\Application\UI\Form;
 use Nette\Database\Context;
 use Nette\Database\DriverException;
+use Nette\Security\AuthenticationException;
 use function password_hash;
 use stdClass;
 
@@ -30,7 +31,11 @@ final class HomepagePresenter extends Presenter
 		$form->addSubmit('login', 'Login');
 
 		$form->onSuccess[] = function (Form $form, stdClass $values) {
-			$this->getUser()->login($values->username, $values->password);
+			try {
+				$this->getUser()->login($values->username, $values->password);
+			} catch (AuthenticationException $e) {
+				$this->flashMessage('Username or password is incorrect.', 'danger');
+			}
 		};
 
 		BaseFormFactory::bootstrapize($form);
