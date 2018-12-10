@@ -1,4 +1,18 @@
 {block content}
+	<script n:if="$user->isLoggedIn()">
+		function voteArticle(action, id) {
+			var http = new XMLHttpRequest();
+			http.open('POST', {link 'Homepage:vote'}, true);
+			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			http.onreadystatechange = function() {
+				if(http.readyState == 4 && http.status == 200) {
+					document.getElementById("vote-"+id).innerHTML = http.responseText;
+				}
+			}
+			http.send('id='+id+'&vote='+action);
+		}
+	</script>
+
 
 {foreach $articles as $article}
 	<div class="jumbotron">
@@ -6,9 +20,11 @@
 		<p class="lead">{$article->perex}</p>
 		<hr class="my-4">
 		<p>{$article->text}</p>
-		<p>
-			Votes: {$article->rank}
-			<a class="btn btn-success btn-lg" href="#" role="button">+1</a> <a class="btn btn-danger btn-lg" href="#" role="button">-1</a>
-		</p>
+		<span>Votes: </span><span id="vote-{$article->id}">{$article->rank}</span>
+		<form class="vote-form" action="{link Homepage:vote}" method="POST" n:if="$user->isLoggedIn()">
+			<input type="hidden" name="id" value="{$article->id}" />
+			<button name="vote" id="plus" class="btn btn-success" value="plus" type="button" onclick="voteArticle('plus', {$article->id}); return false;">+1</button>
+			<button name="vote" id="minus" class="btn btn-danger" value="minus" type="button" onclick="voteArticle('minus', {$article->id}); return false;">-1</button>
+		</form>
 	</div>
 {/foreach}

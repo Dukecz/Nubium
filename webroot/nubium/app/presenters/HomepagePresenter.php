@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Presenters;
 
 use App\forms\BaseFormFactory;
-use function bdump;
+use function in_array;
 use Nette\Application\UI\Presenter;
 use Nette\Application\UI\Form;
 use Nette\Database\Context;
@@ -159,5 +159,27 @@ final class HomepagePresenter extends Presenter
 	{
 		$this->getUser()->logout();
 		$this->redirect('Homepage:');
+	}
+
+	public function renderVote(): void
+	{
+		if (!$this->getUser()->isLoggedIn()) {
+			return;
+		}
+
+		$id = $this->getRequest()->getPost('id');
+		$vote = $this->getRequest()->getPost('vote');
+
+		if (!empty($id) && !empty($vote) && in_array($vote, ['plus', 'minus'])) {
+			switch ($vote) {
+				case 'plus':
+					$this->db->query('UPDATE articles SET rank = rank + 1 WHERE id = ?', $id);
+					break;
+				default:
+					$this->db->query('UPDATE articles SET rank = rank - 1 WHERE id = ?', $id);
+					break;
+			}
+			$this->sendJson($this->db->fetchField('SELECT rank FROM articles WHERE id = ?', $id));
+		}
 	}
 }
