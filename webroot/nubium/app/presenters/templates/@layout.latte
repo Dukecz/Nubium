@@ -11,22 +11,40 @@
 </head>
 
 <body>
-	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<a class="navbar-brand" href="{link Homepage:}">Nubium</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav mr-auto">
+			<li n:class="nav-item, $presenter->isLinkCurrent('Homepage:') ? 'active' : ''">
+				<a class="nav-link" href="{link Homepage:}">Home</a>
+			</li>
+			<li n:if="!$user->isLoggedIn()" n:class="nav-item, $presenter->isLinkCurrent('Homepage:register') ? 'active' : ''">
+				<a class="nav-link" href="{link Homepage:register}">Register</a>
+			</li>
+			<li n:if="$user->isLoggedIn()" n:class="nav-item, $presenter->isLinkCurrent('Homepage:profile') ? 'active' : ''">
+				<a class="nav-link" href="{link Homepage:profile}">Profile</a>
+			</li>
+			<li n:if="!$user->isLoggedIn()" n:class="nav-item, $presenter->isLinkCurrent('Homepage:login') ? 'active' : ''">
+				<a class="nav-link" href="{link Homepage:login}">Login</a>
+			</li>
+			<li n:if="$user->isLoggedIn()" n:class="nav-item">
+				<a class="nav-link" href="{link Homepage:logout}">Logout</a>
+			</li>
+		</ul>
+	</div>
+</nav>
+
+
+	<div n:foreach="$flashes as $flash" n:class="alert, 'alert-'.$flash->type">{$flash->message}</div>
 
 	{include content}
 
 	{block scripts}
 	<script src="https://nette.github.io/resources/js/netteForms.min.js"></script>
 	{/block}
-
-	{if $user->isLoggedIn()}
-		<a href="{link Homepage:logout}">Logout</a>
-	{else}
-		<a href="{link Homepage:register}">Registrace</a>
-	{/if}
-
-	{if !$user->isLoggedIn()}
-		{control loginForm}
-	{/if}
 </body>
 </html>
