@@ -201,6 +201,9 @@ final class HomepagePresenter extends Presenter
 		$this->redirect('Homepage:');
 	}
 
+	/**
+	 * @throws \Nette\Application\AbortException
+	 */
 	public function renderVote(): void
 	{
 		if (!$this->getUser()->isLoggedIn()) {
