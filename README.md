@@ -15,3 +15,7 @@
 * Frontend is heavily simplified
 * vendor folder is versioned because of vagrant
 * HTTPS is disabled because of lack of certificates (would be solved with LE)
+* No translations constants
+* No repositories or entities for simplicity
+* No form classes for simplicity (there is no reuse)
+* Voting is not limited
