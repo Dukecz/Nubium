@@ -18,7 +18,7 @@ final class HomepagePresenter extends Presenter
 	/** @var Context @inject */
 	public $db;
 
-	public function renderDefault()
+	public function renderDefault(): void
 	{
 		if ($this->getUser()->isLoggedIn()) {
 			$articles = $this->db->fetchAll('SELECT * FROM articles');
@@ -45,6 +45,7 @@ final class HomepagePresenter extends Presenter
 		$form->onSuccess[] = function (Form $form, stdClass $values) {
 			try {
 				$this->getUser()->login($values->username, $values->password);
+				$this->redirect('Homepage:');
 			} catch (AuthenticationException $e) {
 				$this->flashMessage('Username or password is incorrect.', 'danger');
 			}
@@ -96,7 +97,7 @@ final class HomepagePresenter extends Presenter
 		return $form;
 	}
 
-	public function createComponentProfileForm()
+	public function createComponentProfileForm(): Form
 	{
 		$form = new Form();
 		$form->addPassword('password', 'Password')
