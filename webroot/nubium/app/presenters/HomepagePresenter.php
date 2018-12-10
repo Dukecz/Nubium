@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Presenters;
 
 use App\forms\BaseFormFactory;
+use function bdump;
 use Nette\Application\UI\Presenter;
 use Nette\Application\UI\Form;
 use Nette\Database\Context;
@@ -16,6 +17,17 @@ final class HomepagePresenter extends Presenter
 {
 	/** @var Context @inject */
 	public $db;
+
+	public function renderDefault()
+	{
+		if ($this->getUser()->isLoggedIn()) {
+			$articles = $this->db->fetchAll('SELECT * FROM articles');
+		} else {
+			$articles = $this->db->fetchAll('SELECT * FROM articles WHERE registeredOnly = 0');
+		}
+
+		$this->template->add('articles', empty($articles) ? [] : $articles);
+	}
 
 	public function createComponentLoginForm(): Form
 	{

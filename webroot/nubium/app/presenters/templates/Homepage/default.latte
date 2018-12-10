@@ -1,1 +1,14 @@
 {block content}
+
+{foreach $articles as $article}
+	<div class="jumbotron">
+		<h1 class="display-6">{$article->title}</h1>
+		<p class="lead">{$article->perex}</p>
+		<hr class="my-4">
+		<p>{$article->text}</p>
+		<p>
+			Votes: {$article->rank}
+			<a class="btn btn-success btn-lg" href="#" role="button">+1</a> <a class="btn btn-danger btn-lg" href="#" role="button">-1</a>
+		</p>
+	</div>
+{/foreach}
