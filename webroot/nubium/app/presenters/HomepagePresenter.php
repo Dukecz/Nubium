@@ -87,7 +87,7 @@ final class HomepagePresenter extends Presenter
 	protected function registerUser(string $username, string $password, string $email): bool
 	{
 		try {
-			$this->db->query('INSERT INTO users ?',
+			$this->db->query('INSERT INTO users',
 				[
 					'username' => $username,
 					'password' => password_hash($password, \PASSWORD_BCRYPT),
