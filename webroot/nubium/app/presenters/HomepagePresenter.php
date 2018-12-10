@@ -10,6 +10,7 @@ use Nette\Application\UI\Form;
 use Nette\Database\Context;
 use Nette\Database\DriverException;
 use Nette\Security\AuthenticationException;
+use Nette\Utils\Paginator;
 use function password_hash;
 use stdClass;
 
@@ -18,15 +19,30 @@ final class HomepagePresenter extends Presenter
 	/** @var Context @inject */
 	public $db;
 
-	public function renderDefault(): void
+	public function renderDefault(int $page = 1): void
 	{
 		if ($this->getUser()->isLoggedIn()) {
-			$articles = $this->db->fetchAll('SELECT * FROM articles');
+			$numberOfArticles = $this->db->fetchField('SELECT COUNT(*) FROM articles');
+			$paginator = $this->getPaginator($numberOfArticles, $page);
+			$articles = $this->db->fetchAll('SELECT * FROM articles LIMIT ? OFFSET ?', $paginator->getLength(), $paginator->getOffset());
 		} else {
-			$articles = $this->db->fetchAll('SELECT * FROM articles WHERE registeredOnly = 0');
+			$numberOfArticles = $this->database->fetchField('SELECT COUNT(*) FROM articles WHERE registeredOnly = 0');
+			$paginator = $this->getPaginator($numberOfArticles, $page);
+			$articles = $this->db->fetchAll('SELECT * FROM articles WHERE registeredOnly = 0', $paginator->getLength(), $paginator->getOffset());
 		}
 
 		$this->template->add('articles', empty($articles) ? [] : $articles);
+		$this->template->add('paginator', $paginator);
+	}
+
+	protected function getPaginator(int $totalCount, int $page): Paginator
+	{
+		$paginator = new Paginator();
+		$paginator->setItemCount($totalCount);
+		$paginator->setItemsPerPage(1);
+		$paginator->setPage($page);
+
+		return $paginator;
 	}
 
 	public function createComponentLoginForm(): Form

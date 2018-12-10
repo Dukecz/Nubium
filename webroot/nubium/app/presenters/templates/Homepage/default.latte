@@ -13,7 +13,6 @@
 		}
 	</script>
 
-
 {foreach $articles as $article}
 	<div class="jumbotron">
 		<h1 class="display-6">{$article->title}</h1>
@@ -28,3 +27,19 @@
 		</form>
 	</div>
 {/foreach}
+
+<nav>
+	<ul class="pagination">
+	{if !$paginator->isFirst()}
+		<li class="page-item"><a class="page-link" n:href="default, 1">First</a></li>
+		<li class="page-item"><a class="page-link" n:href="default, $paginator->page-1">Previous</a></li>
+	{/if}
+
+		<li class="page-item disabled"><a class="page-link" href="#"> Page {$paginator->page} of {$paginator->pageCount}</a></li>
+
+	{if !$paginator->isLast()}
+		<li class="page-item"><a class="page-link" n:href="default, $paginator->page+1">Next</a></li>
+		<li class="page-item"><a class="page-link" n:href="default, $paginator->pageCount">Last</a></li>
+	{/if}
+	</ul>
+</nav>
