@@ -74,7 +74,7 @@ final class HomepagePresenter extends Presenter
 			if ($result) {
 				$this->flashMessage('Registration successful', 'success');
 			} else {
-				$this->flashMessage('Registration failed', 'error');
+				$this->flashMessage('Registration failed', 'danger');
 			}
 			$this->redirect('Homepage:');
 		};
